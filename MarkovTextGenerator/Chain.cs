@@ -34,6 +34,29 @@ public class Chain
         // TODO: Break sentence up into word pairs
         // TODO: Add each word pair to the chain by calling AddPair
         // TODO: The last word of any sentence will be paired up with an empty string to show that it is the end of the sentence
+
+        if (string.IsNullOrWhiteSpace(sentence))
+            return;
+
+        // Split the sentence into words by spaces
+        string[] parts = sentence.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+        // If there's only one word, just pair it with ""
+        if (parts.Length == 1)
+        {
+            AddPair(parts[0], "");
+            return;
+        }
+
+        // Add each pair of consecutive words
+        for (int i = 0; i < parts.Length - 1; i++)
+        {
+            AddPair(parts[i], parts[i + 1]);
+        }
+
+        // Last word ends the sentence
+        AddPair(parts[parts.Length - 1], "");
+
     }
 
     // Adds a pair of words to the chain that will appear in order
@@ -80,12 +103,17 @@ public class Chain
         if (Words.TryGetValue(word, out List<Word>? value))
         {
             List<Word> choices = value;
-            double test = _rand.NextDouble();
-
-            Console.WriteLine("I picked the number " + test);
+            double prob = _rand.NextDouble();
+            double cumulative = 0.0;
+            foreach (Word w in choices)
+            {
+                cumulative += w.Probability;
+                if (prob <= cumulative)
+                    return w.ToString();
+            }
         }
-
-        return "idkbbq";
+        // Fallback (floating‑point edge case)
+        return "";
     }
 
     /// <summary>
@@ -96,7 +124,28 @@ public class Chain
     /// <returns></returns>
     public string GenerateSentence(string startingWord)
     {
-        return "";
+        if (string.IsNullOrWhiteSpace(startingWord))
+            return "";
+
+
+        List<string> result = new() { startingWord };
+        string current = startingWord;
+
+        int count = 1;
+        int maxLength = 15; // Prevent infinite loops in case of cycles
+
+        while (count<maxLength)
+        {
+            string next = GetNextWord(current);
+            if (string.IsNullOrEmpty(next))
+                break;
+
+            result.Add(next);
+            current = next;
+            count++;
+        }
+
+        return string.Join(" ", result);
     }
 
     /// <summary>
