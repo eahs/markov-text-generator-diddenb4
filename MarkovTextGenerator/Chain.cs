@@ -132,13 +132,13 @@ public class Chain
         string current = startingWord;
 
         int count = 1;
-        int maxLength = 15; // Prevent infinite loops in case of cycles
+        int maxLength = 25; // Prevent infinite loops in case of cycles
 
         while (count<maxLength)
         {
             string next = GetNextWord(current);
             if (string.IsNullOrEmpty(next))
-                break;
+                count+=10;
 
             result.Add(next);
             current = next;
